@@ -1,0 +1,10 @@
+{
+  "name": "internship-root",
+  "private": true,
+  "scripts": {
+    "d": "cd disaster-relief-portal && bun run dev",
+    "dev": "cd disaster-relief-portal && bun run dev",
+    "start": "cd disaster-relief-portal && bun run start",
+    "build": "cd disaster-relief-portal && bun run build"
+  }
+}

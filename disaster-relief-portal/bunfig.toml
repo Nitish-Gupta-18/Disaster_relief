@@ -1,0 +1,7 @@
+[install]
+# Use Bun's native lockfile
+exact = true
+
+[install.cache]
+# Cache builds for faster cold starts
+type = "hardlink"

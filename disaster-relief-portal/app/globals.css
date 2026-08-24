@@ -1,0 +1,335 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{height:100%;scroll-behavior:smooth}
+  body{
+    height:100%;margin:0;min-width:320px;overflow-x:hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -20%,rgba(255,122,48,0.07),transparent),
+      radial-gradient(ellipse 60% 50% at 100% 100%,rgba(14,165,233,0.05),transparent),
+      radial-gradient(ellipse 50% 40% at 0% 80%,rgba(16,185,129,0.03),transparent),
+      #F8FAFC;
+    color:#0F172A;
+    font-family:'Inter',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-feature-settings:'cv02','cv03','cv04','cv11';
+    letter-spacing:-0.011em;
+  }
+  #__next,#root{height:100%}
+}
+
+::selection{background:rgba(255,122,48,0.22);color:#0F172A}
+
+/* ── Custom scrollbar (theme-matched) ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#CBD5E1,#94A3B8);border-radius:9999px;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#94A3B8,#64748B);background-clip:content-box}
+
+/* ── Subtle grain texture overlay (CSS-only, no assets) ── */
+.bg-noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── Layered background radial glow ── */
+.bg-radial-glow {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,122,48,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 80%, rgba(14,165,233,0.04) 0%, transparent 60%),
+    #F8FAFC;
+}
+
+*:focus-visible{outline:2px solid #FF7A30;outline-offset:2px;border-radius:4px}
+
+.leaflet-container{width:100%;height:100%;background:#F1F5F9!important;font-family:'Inter',ui-sans-serif,system-ui,sans-serif}
+.leaflet-control-zoom{border:1px solid #E2E8F0!important;border-radius:14px!important;overflow:hidden;box-shadow:0 4px 16px rgba(15,23,42,0.08)!important;backdrop-filter:blur(12px)!important;background:rgba(255,255,255,0.85)!important}
+.leaflet-control-zoom a{background:transparent!important;color:#475569!important;border-bottom:1px solid #F1F5F9!important;width:34px!important;height:34px!important;line-height:34px!important;font-size:16px!important;font-weight:600!important;transition:all .2s!important}
+.leaflet-control-zoom a:hover{background:#FF7A30!important;color:#fff!important}
+.leaflet-control-attribution{background:rgba(255,255,255,0.85)!important;backdrop-filter:blur(12px)!important;color:#94A3B8!important;font-size:10px!important;padding:2px 8px!important;border-radius:8px!important}
+/* ── Leaflet popup: match app card design ── */
+.leaflet-popup-content-wrapper{
+  background:#fff;
+  color:#0F172A;
+  border:1px solid rgba(226,232,240,0.8);
+  border-radius:16px!important;
+  box-shadow:0 8px 30px -4px rgba(15,23,42,0.12),0 0 0 1px rgba(255,255,255,0.5) inset!important;
+}
+.leaflet-popup-tip{background:#fff;box-shadow:none!important}
+.leaflet-popup-content{margin:12px 18px!important;font-size:13px!important;line-height:1.6!important}
+.leaflet-popup-close-button{color:#94A3B8!important;font-size:18px!important;padding:6px 10px!important;transition:color .15s!important}
+.leaflet-popup-close-button:hover{color:#FF7A30!important;background:transparent!important}
+
+/* ── Map container blends into page ── */
+.leaflet-container{border-radius:20px;overflow:hidden}
+.map-wrapper{border-radius:20px;overflow:hidden;box-shadow:0 2px 12px -4px rgba(15,23,42,0.06);border:1px solid rgba(226,232,240,0.6)}
+
+/* ── Map markers: custom styled pins (orange/teal palette) ── */
+.relief-pin{width:20px;height:20px;border-radius:9999px;border:2.5px solid #fff;box-shadow:0 0 0 4px rgba(15,23,42,0.15),0 3px 8px rgba(15,23,42,0.25);transition:transform .2s,box-shadow .2s}
+.relief-pin:hover{transform:scale(1.4);box-shadow:0 0 0 6px rgba(15,23,42,0.2),0 4px 12px rgba(15,23,42,0.3)}
+
+/* Diamond-shaped volunteer markers with teal palette */
+.relief-pin-volunteer {
+  border-radius: 3px !important;
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 4px rgba(13,148,136,0.2), 0 3px 8px rgba(15,23,42,0.2);
+}
+.relief-pin-volunteer:hover {
+  transform: rotate(45deg) scale(1.35);
+  box-shadow: 0 0 0 6px rgba(13,148,136,0.25), 0 4px 12px rgba(15,23,42,0.28);
+}
+
+.cluster-pin{width:38px;height:38px;border-radius:9999px;display:grid;place-items:center;color:#fff;border:3px solid #fff;font-size:13px;font-weight:800;box-shadow:0 0 0 4px rgba(15,23,42,0.18),0 6px 16px rgba(15,23,42,0.28);transition:transform .2s}
+.cluster-pin:hover{transform:scale(1.2)}
+
+/* ── Status stripe indicators (replaces pill badges) ── */
+.status-stripe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.625rem;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: capitalize;
+  border-left: 3px solid;
+  background: #F8FAFC;
+  transition: background 0.15s ease;
+}
+/* Urgency stripe variants — left-border color, soft background */
+.status-stripe-urg-critical  { border-left-color: #EF4444; color: #991B1B; background: #FEF2F2; }
+.status-stripe-urg-high      { border-left-color: #FF7A30; color: #9A3412; background: #FFF7ED; }
+.status-stripe-urg-medium     { border-left-color: #F59E0B; color: #92400E; background: #FFFBEB; }
+.status-stripe-urg-low        { border-left-color: #94A3B8; color: #475569; background: #F8FAFC; }
+
+/* Status stripe variants */
+.status-stripe-pending        { border-left-color: #94A3B8; color: #475569; background: #F8FAFC; }
+.status-stripe-assigned       { border-left-color: #0EA5E9; color: #075985; background: #F0F9FF; }
+.status-stripe-in_progress    { border-left-color: #FF7A30; color: #9A3412; background: #FFF7ED; }
+.status-stripe-completed      { border-left-color: #10B981; color: #065F46; background: #ECFDF5; }
+
+/* ── Typography scale: 3 tiers only ── */
+.text-hero    { font-weight: 800; letter-spacing: -0.03em; }
+.text-label   { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; }
+.text-meta    { font-size: 12px; font-weight: 400; color: #64748B; }
+
+/* ── Smooth transitions utility ── */
+.transition-card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.15s ease, transform 0.2s ease;
+}
+.transition-row {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes slideRight{from{width:0}to{width:100%}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,122,48,0.4)}50%{box-shadow:0 0 0 12px rgba(255,122,48,0)}}
+@keyframes borderGlow{0%,100%{border-color:rgba(255,122,48,0.3)}50%{border-color:rgba(255,122,48,0.8)}}
+@keyframes gradientFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+.shimmer{background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+.animate-fade-in-up{animation:fadeInUp .45s ease-out}
+.animate-scale-in{animation:scaleIn .25s ease-out}
+.animate-glow-pulse{animation:glowPulse 2s infinite}
+.animate-gradient-flow{background-size:300% 300%;animation:gradientFlow 8s ease infinite}
+
+.glass-panel{
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(226,232,240,.6);
+  box-shadow:0 8px 32px -8px rgba(15,23,42,.08),0 0 0 1px rgba(255,255,255,.4) inset;
+}
+
+.glass-sidebar{
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+}
+
+.card-premium{
+  background:#fff;
+  border:1px solid rgba(226,232,240,.7);
+  border-radius:20px;
+  box-shadow:0 1px 3px rgba(15,23,42,.04),0 4px 16px -8px rgba(15,23,42,.06);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+.card-premium:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 30px -6px rgba(15,23,42,.12),0 0 0 1px rgba(15,23,42,.04);
+  border-color:rgba(255,122,48,.25);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{opacity:1}
+
+@media(pointer:coarse){
+  button,a,select,input[type="checkbox"],input[type="radio"]{min-height:44px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+
+@media print{
+  body{background:#fff;color:#000}
+  .sidebar,header,button{display:none}
+}
+
+/* ─────────────── MAP: Critical-urgency pulse ─────────────── */
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5), 0 3px 8px rgba(15,23,42,0.25); transform: scale(1); }
+  50%      { box-shadow: 0 0 0 10px rgba(239,68,68,0), 0 3px 12px rgba(15,23,42,0.35); transform: scale(1.18); }
+}
+.relief-pin-critical {
+  animation: pulse-critical 2.2s ease-in-out infinite;
+}
+.relief-pin-critical:hover {
+  animation: none;
+}
+
+/* ─────────────── MAP: Legend panel ─────────────── */
+.map-legend {
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(226,232,240,0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px -6px rgba(15,23,42,0.12);
+  padding: 14px 16px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.map-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.map-legend-diamond {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* ─────────────── MAP: Live counter overlay ─────────────── */
+.map-counter {
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(226,232,240,0.6);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px -4px rgba(15,23,42,0.08);
+  padding: 10px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.map-counter-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* ─────────────── MAP: Side detail panel ─────────────── */
+.map-side-panel {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(226,232,240,0.7);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.4) inset;
+  width: 340px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 20px;
+  animation: slideInRight 0.25s ease-out;
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─────────────── MAP: Loading shimmer for map ─────────────── */
+.map-loading {
+  background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 12px;
+}
+
+/* ─────────────── Table loading skeleton rows ─────────────── */
+.skeleton-row {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+  height: 16px;
+}
+
+/* ─────────────── Pill badges (standardized) ─────────────── */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid;
+  padding: 0.25rem 0.625rem;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.pill-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+/* urgency */
+.pill-critical  { background: #FEF2F2; color: #B91C1C; border-color: #FECACA; }
+.pill-high      { background: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
+.pill-medium    { background: #FFFBEB; color: #B45309; border-color: #FDE68A; }
+.pill-low       { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
+/* status */
+.pill-pending     { background: #F1F5F9; color: #475569; border-color: #E2E8F0; }
+.pill-assigned    { background: #F0F9FF; color: #0369A1; border-color: #BAE6FD; }
+.pill-in_progress { background: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
+.pill-completed   { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
